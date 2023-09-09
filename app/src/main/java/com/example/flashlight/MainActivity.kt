@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             val hasFlashLight = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
 
             if (!hasFlashLight){
-                imageFilterLight.isEnabled = false
+                light.isEnabled = false
                 Toast.makeText(this@MainActivity, "This device does not have a FlashLight", Toast.LENGTH_LONG).show()
             }
 
@@ -79,6 +79,6 @@ class MainActivity : AppCompatActivity() {
         val spannableString = SpannableString(getString(R.string.flashlight))
         val colorSpan = ForegroundColorSpan(ContextCompat.getColor(this,R.color.clr_green))
         spannableString.setSpan(colorSpan,5,10, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        binding.textViewTitle.text = spannableString
+        binding.title.text = spannableString
     }
 }
