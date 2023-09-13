@@ -3,6 +3,7 @@ package com.example.flashlight
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -36,41 +37,57 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, "This device does not have a FlashLight", Toast.LENGTH_LONG).show()
             }
 
-            layoutMain.setTransitionListener(object : MotionLayout.TransitionListener{
-                override fun onTransitionStarted(motionLayout : MotionLayout? , startId : Int , endId : Int) {}
+            layoutMain.setTransitionListener(object : MotionLayout.TransitionListener {
+                override fun onTransitionStarted(motionLayout: MotionLayout?, startId: Int, endId: Int) {}
 
-                override fun onTransitionChange(motionLayout : MotionLayout? , startId : Int , endId : Int , progress : Float) {}
+                override fun onTransitionChange(
+                    motionLayout: MotionLayout?,
+                    startId: Int,
+                    endId: Int,
+                    progress: Float
+                ) {}
 
-                override fun onTransitionCompleted(motionLayout : MotionLayout? , currentId : Int)
-                {
-                    if (currentId == motionLayout!!.endState)
-                    {
-                        try
-                        {
-                            val cameraId = cameraManager.cameraIdList[0]
-                            cameraManager.setTorchMode(cameraId,true)
-                        }catch (e : CameraAccessException)
-                        {
-                            e.printStackTrace()
-                        }catch (e:ArrayIndexOutOfBoundsException)
-                        {
-                            e.printStackTrace()
+                override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
+                    try {
+                        val cameraIdList = cameraManager.cameraIdList
+                        var cameraId: String? = null
+
+                        for (id in cameraIdList) {
+                            val characteristics = cameraManager.getCameraCharacteristics(id)
+                            val flashAvailable =
+                                characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)
+                            if (flashAvailable == true) {
+                                cameraId = id
+                                break
+                            }
                         }
-                    }
-                    else{
-                        try
-                        {
-                            val cameraId = cameraManager.cameraIdList[0]
-                            cameraManager.setTorchMode(cameraId,false )
-                        }catch (e : CameraAccessException)
-                        { e.printStackTrace() }
-                        catch (e:ArrayIndexOutOfBoundsException)
-                        { e.printStackTrace() }
+
+                        if (cameraId != null) {
+                            if (currentId == motionLayout!!.endState) {
+                                cameraManager.setTorchMode(cameraId, true)
+                            } else {
+                                cameraManager.setTorchMode(cameraId, false)
+                            }
+                        } else {
+                             Toast.makeText(
+                                 this@MainActivity,
+                                 "No camera with flash available on your device.",
+                                 Toast.LENGTH_SHORT
+                             ).show()
+                        }
+                    } catch (e: CameraAccessException) {
+                        e.printStackTrace()
+                    } catch (e: ArrayIndexOutOfBoundsException) {
+                        e.printStackTrace()
                     }
                 }
 
-                override fun onTransitionTrigger(motionLayout : MotionLayout? , triggerId : Int , positive : Boolean , progress : Float) {}
-
+                override fun onTransitionTrigger(
+                    motionLayout: MotionLayout?,
+                    triggerId: Int,
+                    positive: Boolean,
+                    progress: Float
+                ) {}
             })
         }
 
